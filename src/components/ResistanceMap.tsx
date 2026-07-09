@@ -24,7 +24,7 @@ function getDynamicCta(resistanceName: string): { headline: string; sub: string;
       headline: 'Authority is the antidote. Script it.',
       sub: 'Learn how to build credibility into every touchpoint — from first email to close.',
       label: 'Get the Authority Playbook',
-      href: 'https://mjwdesign.co/playbook',
+      href: 'https://mjwdesign.ca/playbook',
     };
   }
   if (lower.includes('price') || lower.includes('budget') || lower.includes('cost') || lower.includes('loss')) {
@@ -32,7 +32,7 @@ function getDynamicCta(resistanceName: string): { headline: string; sub: string;
       headline: 'Price resistance is a framing problem.',
       sub: 'Discover how to reframe cost as risk — and make inaction feel more expensive than buying.',
       label: 'Get the Value Framing Playbook',
-      href: 'https://mjwdesign.co/playbook',
+      href: 'https://mjwdesign.ca/playbook',
     };
   }
   if (lower.includes('social') || lower.includes('proof') || lower.includes('validation') || lower.includes('peer')) {
@@ -40,7 +40,7 @@ function getDynamicCta(resistanceName: string): { headline: string; sub: string;
       headline: 'They need to see others like them succeed.',
       sub: 'Build a social proof engine that turns hesitation into confidence.',
       label: 'Get the Social Proof Playbook',
-      href: 'https://mjwdesign.co/playbook',
+      href: 'https://mjwdesign.ca/playbook',
     };
   }
   // Default CTA
@@ -48,7 +48,7 @@ function getDynamicCta(resistanceName: string): { headline: string; sub: string;
     headline: 'Knowing the resistance is only half the battle.',
     sub: 'Learn how to script the entire conversation — from first touch to closed deal.',
     label: 'Get the MJW Communication Playbook',
-    href: 'https://mjwdesign.co/playbook',
+    href: 'https://mjwdesign.ca/playbook',
   };
 }
 
