@@ -1,3 +1,12 @@
+export interface WizardInput {
+  businessType: string;
+  product: string;
+  personaDesc: string;
+  framework?: FrameworkOption;
+}
+
+export type FrameworkOption = 'Cialdini Principles' | 'Kahneman Loss Aversion' | 'Fogg Behavior Model' | 'All Frameworks';
+
 export interface ResistanceMap {
   personaName: string;
   primaryResistance: {

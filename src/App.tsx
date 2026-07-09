@@ -3,17 +3,19 @@ import { Brain, Crosshair } from 'lucide-react';
 import InputWizard from './components/InputWizard';
 import LoadingState from './components/LoadingState';
 import ResistanceMap from './components/ResistanceMap';
-import type { ResistanceMap as ResistanceMapType } from './types';
+import type { ResistanceMap as ResistanceMapType, WizardInput } from './types';
 
 type AppState = 'wizard' | 'loading' | 'results';
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>('wizard');
   const [result, setResult] = useState<ResistanceMapType | null>(null);
+  const [wizardInput, setWizardInput] = useState<WizardInput | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (data: { businessType: string; product: string; personaDesc: string }) => {
+  const handleSubmit = async (data: WizardInput) => {
     setError(null);
+    setWizardInput(data);
     setAppState('loading');
     try {
       const response = await fetch('/api/map-resistance', {
@@ -21,18 +23,26 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error('Failed to analyze resistance');
-      const json: ResistanceMapType = await response.json();
-      setResult(json);
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        const message = json?.error || 'Failed to analyze resistance.';
+        throw new Error(message);
+      }
+
+      setResult(json as ResistanceMapType);
       setAppState('results');
-    } catch {
-      setError('Something went wrong. Please try again.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      setError(message);
       setAppState('wizard');
     }
   };
 
   const handleReset = () => {
     setResult(null);
+    setWizardInput(null);
     setError(null);
     setAppState('wizard');
   };
@@ -80,7 +90,7 @@ export default function App() {
               </div>
             )}
 
-            <InputWizard onSubmit={handleSubmit} />
+            <InputWizard onSubmit={handleSubmit} initialData={wizardInput} />
 
             <div className="max-w-2xl mx-auto grid grid-cols-3 gap-4 pt-4">
               {[
@@ -101,7 +111,7 @@ export default function App() {
         {appState === 'loading' && <LoadingState />}
 
         {appState === 'results' && result && (
-          <ResistanceMap data={result} onReset={handleReset} />
+          <ResistanceMap data={result} wizardInput={wizardInput} onReset={handleReset} />
         )}
       </main>
     </div>

@@ -1,44 +1,44 @@
 import { useState } from 'react';
-import { Brain, Building2, Package, User, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Brain, Building2, Package, User, ChevronRight, ChevronLeft, FlaskConical } from 'lucide-react';
+import type { WizardInput, FrameworkOption } from '../types';
 
 interface InputWizardProps {
-  onSubmit: (data: { businessType: string; product: string; personaDesc: string }) => void;
+  onSubmit: (data: WizardInput) => void;
+  initialData?: WizardInput | null;
 }
 
 const steps = [
-  {
-    number: 1,
-    label: 'The Business',
-    icon: Building2,
-  },
-  {
-    number: 2,
-    label: 'The Offer',
-    icon: Package,
-  },
-  {
-    number: 3,
-    label: 'The Persona',
-    icon: User,
-  },
+  { number: 1, label: 'The Business', icon: Building2 },
+  { number: 2, label: 'The Offer', icon: Package },
+  { number: 3, label: 'The Persona', icon: User },
+  { number: 4, label: 'Framework', icon: FlaskConical },
 ];
 
-export default function InputWizard({ onSubmit }: InputWizardProps) {
+const frameworkOptions: { value: FrameworkOption; label: string; desc: string }[] = [
+  { value: 'All Frameworks', label: 'Auto-Select Best Fit', desc: 'AI picks the single most effective framework for this persona.' },
+  { value: 'Cialdini Principles', label: 'Cialdini Principles', desc: 'Reciprocity, Commitment, Social Proof, Authority, Liking, Scarcity, Unity.' },
+  { value: 'Kahneman Loss Aversion', label: 'Kahneman Loss Aversion', desc: 'Frame the offer around what the persona stands to lose by not acting.' },
+  { value: 'Fogg Behavior Model', label: 'Fogg Behavior Model', desc: 'Diagnose and fix motivation, ability, or prompt blockers.' },
+];
+
+export default function InputWizard({ onSubmit, initialData }: InputWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
-  const [businessType, setBusinessType] = useState('');
-  const [product, setProduct] = useState('');
-  const [personaDesc, setPersonaDesc] = useState('');
+  const [businessType, setBusinessType] = useState(initialData?.businessType ?? '');
+  const [product, setProduct] = useState(initialData?.product ?? '');
+  const [personaDesc, setPersonaDesc] = useState(initialData?.personaDesc ?? '');
+  const [framework, setFramework] = useState<FrameworkOption>(initialData?.framework ?? 'All Frameworks');
 
   const canProceed = () => {
     if (currentStep === 1) return businessType.trim().length > 0;
     if (currentStep === 2) return product.trim().length > 0;
     if (currentStep === 3) return personaDesc.trim().length > 0;
+    if (currentStep === 4) return true; // framework always has a default
     return false;
   };
 
   const handleNext = () => {
-    if (currentStep < 3) setCurrentStep(currentStep + 1);
-    else if (canProceed()) onSubmit({ businessType, product, personaDesc });
+    if (currentStep < 4) setCurrentStep(currentStep + 1);
+    else onSubmit({ businessType, product, personaDesc, framework });
   };
 
   const handlePrev = () => {
@@ -47,6 +47,7 @@ export default function InputWizard({ onSubmit }: InputWizardProps) {
 
   return (
     <div className="w-full max-w-2xl mx-auto">
+      {/* Step indicator */}
       <div className="mb-10">
         <div className="flex items-center justify-between relative">
           <div className="absolute top-5 left-0 right-0 h-px bg-slate-700 z-0" />
@@ -134,6 +135,33 @@ export default function InputWizard({ onSubmit }: InputWizardProps) {
           </div>
         )}
 
+        {currentStep === 4 && (
+          <div className="space-y-6">
+            <div>
+              <p className="text-xs font-semibold tracking-widest uppercase text-cyan-500 mb-2">Step 04 — Framework</p>
+              <h2 className="text-2xl font-bold text-white leading-tight">Which psychological framework should we apply?</h2>
+              <p className="text-slate-400 mt-2 text-sm">Let the AI choose, or pin the analysis to a specific framework you want to use.</p>
+            </div>
+            <div className="space-y-3">
+              {frameworkOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setFramework(opt.value)}
+                  className={`w-full text-left px-5 py-4 rounded-xl border-2 transition-all ${
+                    framework === opt.value
+                      ? 'border-cyan-500 bg-cyan-500/10'
+                      : 'border-slate-700 bg-slate-800 hover:border-slate-500'
+                  }`}
+                >
+                  <p className={`font-semibold text-sm ${framework === opt.value ? 'text-cyan-300' : 'text-slate-300'}`}>{opt.label}</p>
+                  <p className="text-slate-500 text-xs mt-0.5">{opt.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-700">
           <button
             onClick={handlePrev}
@@ -153,7 +181,7 @@ export default function InputWizard({ onSubmit }: InputWizardProps) {
                 : 'bg-slate-800 text-slate-600 cursor-not-allowed'
             }`}
           >
-            {currentStep === 3 ? (
+            {currentStep === 4 ? (
               <>
                 <Brain size={16} />
                 Map the Resistance
