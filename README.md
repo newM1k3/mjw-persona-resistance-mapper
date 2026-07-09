@@ -172,6 +172,18 @@ public/
 
 ## Changelog
 
+### v0.3.0 — Persona System Expansion
+
+- **Personas:** Renamed all three existing framework references from real academic names (Cialdini, Kahneman, Fogg) to persona-based analytical identities: The Influence Architect, The Loss Framer, and The Friction Analyst.
+- **Personas:** Added four new analytical personas drawn from the Advisory Panel framework: The Value Architect (price/value resistance), The Trust Builder (authority/credibility resistance), The Category Challenger (positioning/awareness resistance), and The Urgency Engineer (procrastination/timing resistance).
+- **Backend:** Updated `buildSystemPrompt()` to generate a full, persona-specific system prompt for each of the seven personas, each with its own analytical toolkit and voice.
+- **Backend:** Updated Zod schema and tool use enum to reflect the seven new `FrameworkName` values.
+- **Frontend:** Wizard Step 4 now renders all seven personas as a scrollable card selector with per-persona accent colours and taglines.
+- **Frontend:** `ResistanceMap` badge colour function updated to cover all seven personas using `.includes()` matching.
+- **Frontend:** Dynamic CTA block now has a unique headline and sub-copy for each of the seven personas.
+- **Frontend:** Hero showcase cards updated to reflect the new persona names.
+- **Types:** Added `PersonaId`, `FrameworkName`, `PersonaDefinition`, and `PERSONAS` constant to `types/index.ts`; replaced `FrameworkOption` with `PersonaId` throughout.
+
 ### v0.2.0 — Backend Hardening, Frontend Refactor & Product Enhancements
 
 - **Backend:** Replaced raw JSON string parsing with Anthropic Tool Use (structured outputs) to guarantee schema compliance.

@@ -92,15 +92,16 @@ export default function App() {
 
             <InputWizard onSubmit={handleSubmit} initialData={wizardInput} />
 
-            <div className="max-w-2xl mx-auto grid grid-cols-3 gap-4 pt-4">
+            <div className="max-w-2xl mx-auto grid grid-cols-4 gap-3 pt-4">
               {[
-                { icon: '01', label: 'Cialdini Principles', desc: 'Persuasion science' },
-                { icon: '02', label: 'Kahneman Theory', desc: 'Loss aversion mapping' },
-                { icon: '03', label: 'Fogg Behavior', desc: 'Motivation + ability' },
+                { color: 'text-violet-500', label: 'The Influence Architect', desc: 'Social & compliance barriers' },
+                { color: 'text-amber-500', label: 'The Loss Framer', desc: 'Risk & loss aversion' },
+                { color: 'text-cyan-500', label: 'The Friction Analyst', desc: 'Motivation & ability blockers' },
+                { color: 'text-emerald-500', label: 'The Value Architect', desc: 'Price & value perception' },
               ].map((item) => (
-                <div key={item.icon} className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-center space-y-1.5">
-                  <p className="text-cyan-600 text-xs font-bold tracking-widest uppercase">{item.icon}</p>
-                  <p className="text-slate-300 text-sm font-semibold">{item.label}</p>
+                <div key={item.label} className="bg-slate-900/60 border border-slate-800 rounded-xl p-3 text-center space-y-1.5">
+                  <div className={`w-2 h-2 rounded-full mx-auto ${item.color.replace('text-', 'bg-')}`} />
+                  <p className="text-slate-300 text-xs font-semibold leading-snug">{item.label}</p>
                   <p className="text-slate-600 text-xs">{item.desc}</p>
                 </div>
               ))}

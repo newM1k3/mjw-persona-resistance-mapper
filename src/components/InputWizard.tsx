@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Brain, Building2, Package, User, ChevronRight, ChevronLeft, FlaskConical } from 'lucide-react';
-import type { WizardInput, FrameworkOption } from '../types';
+import type { WizardInput, PersonaId } from '../types';
+import { PERSONAS } from '../types';
 
 interface InputWizardProps {
   onSubmit: (data: WizardInput) => void;
@@ -11,34 +12,61 @@ const steps = [
   { number: 1, label: 'The Business', icon: Building2 },
   { number: 2, label: 'The Offer', icon: Package },
   { number: 3, label: 'The Persona', icon: User },
-  { number: 4, label: 'Framework', icon: FlaskConical },
+  { number: 4, label: 'Lens', icon: FlaskConical },
 ];
 
-const frameworkOptions: { value: FrameworkOption; label: string; desc: string }[] = [
-  { value: 'All Frameworks', label: 'Auto-Select Best Fit', desc: 'AI picks the single most effective framework for this persona.' },
-  { value: 'Cialdini Principles', label: 'Cialdini Principles', desc: 'Reciprocity, Commitment, Social Proof, Authority, Liking, Scarcity, Unity.' },
-  { value: 'Kahneman Loss Aversion', label: 'Kahneman Loss Aversion', desc: 'Frame the offer around what the persona stands to lose by not acting.' },
-  { value: 'Fogg Behavior Model', label: 'Fogg Behavior Model', desc: 'Diagnose and fix motivation, ability, or prompt blockers.' },
-];
+// Tailwind colour map for persona accent dots in the selector
+const accentDotClass: Record<string, string> = {
+  slate: 'bg-slate-400',
+  violet: 'bg-violet-500',
+  amber: 'bg-amber-500',
+  cyan: 'bg-cyan-500',
+  emerald: 'bg-emerald-500',
+  blue: 'bg-blue-500',
+  indigo: 'bg-indigo-500',
+  orange: 'bg-orange-500',
+};
+
+const accentBorderClass: Record<string, string> = {
+  slate: 'border-slate-500',
+  violet: 'border-violet-500',
+  amber: 'border-amber-500',
+  cyan: 'border-cyan-500',
+  emerald: 'border-emerald-500',
+  blue: 'border-blue-500',
+  indigo: 'border-indigo-500',
+  orange: 'border-orange-500',
+};
+
+const accentTextClass: Record<string, string> = {
+  slate: 'text-slate-300',
+  violet: 'text-violet-300',
+  amber: 'text-amber-300',
+  cyan: 'text-cyan-300',
+  emerald: 'text-emerald-300',
+  blue: 'text-blue-300',
+  indigo: 'text-indigo-300',
+  orange: 'text-orange-300',
+};
 
 export default function InputWizard({ onSubmit, initialData }: InputWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [businessType, setBusinessType] = useState(initialData?.businessType ?? '');
   const [product, setProduct] = useState(initialData?.product ?? '');
   const [personaDesc, setPersonaDesc] = useState(initialData?.personaDesc ?? '');
-  const [framework, setFramework] = useState<FrameworkOption>(initialData?.framework ?? 'All Frameworks');
+  const [personaId, setPersonaId] = useState<PersonaId>(initialData?.personaId ?? 'auto');
 
   const canProceed = () => {
     if (currentStep === 1) return businessType.trim().length > 0;
     if (currentStep === 2) return product.trim().length > 0;
     if (currentStep === 3) return personaDesc.trim().length > 0;
-    if (currentStep === 4) return true; // framework always has a default
+    if (currentStep === 4) return true;
     return false;
   };
 
   const handleNext = () => {
     if (currentStep < 4) setCurrentStep(currentStep + 1);
-    else onSubmit({ businessType, product, personaDesc, framework });
+    else onSubmit({ businessType, product, personaDesc, personaId });
   };
 
   const handlePrev = () => {
@@ -82,6 +110,7 @@ export default function InputWizard({ onSubmit, initialData }: InputWizardProps)
       </div>
 
       <div className="bg-slate-900 border border-slate-700 rounded-2xl p-8 shadow-2xl">
+        {/* Step 1 */}
         {currentStep === 1 && (
           <div className="space-y-6">
             <div>
@@ -100,6 +129,7 @@ export default function InputWizard({ onSubmit, initialData }: InputWizardProps)
           </div>
         )}
 
+        {/* Step 2 */}
         {currentStep === 2 && (
           <div className="space-y-6">
             <div>
@@ -118,6 +148,7 @@ export default function InputWizard({ onSubmit, initialData }: InputWizardProps)
           </div>
         )}
 
+        {/* Step 3 */}
         {currentStep === 3 && (
           <div className="space-y-6">
             <div>
@@ -135,33 +166,41 @@ export default function InputWizard({ onSubmit, initialData }: InputWizardProps)
           </div>
         )}
 
+        {/* Step 4 — Analytical Lens selector */}
         {currentStep === 4 && (
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div>
-              <p className="text-xs font-semibold tracking-widest uppercase text-cyan-500 mb-2">Step 04 — Framework</p>
-              <h2 className="text-2xl font-bold text-white leading-tight">Which psychological framework should we apply?</h2>
-              <p className="text-slate-400 mt-2 text-sm">Let the AI choose, or pin the analysis to a specific framework you want to use.</p>
+              <p className="text-xs font-semibold tracking-widest uppercase text-cyan-500 mb-2">Step 04 — Analytical Lens</p>
+              <h2 className="text-2xl font-bold text-white leading-tight">Which expert should analyse this persona?</h2>
+              <p className="text-slate-400 mt-2 text-sm">Each lens diagnoses a different type of resistance. Let the AI choose, or pin to a specific expert.</p>
             </div>
-            <div className="space-y-3">
-              {frameworkOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setFramework(opt.value)}
-                  className={`w-full text-left px-5 py-4 rounded-xl border-2 transition-all ${
-                    framework === opt.value
-                      ? 'border-cyan-500 bg-cyan-500/10'
-                      : 'border-slate-700 bg-slate-800 hover:border-slate-500'
-                  }`}
-                >
-                  <p className={`font-semibold text-sm ${framework === opt.value ? 'text-cyan-300' : 'text-slate-300'}`}>{opt.label}</p>
-                  <p className="text-slate-500 text-xs mt-0.5">{opt.desc}</p>
-                </button>
-              ))}
+            <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+              {PERSONAS.map((p) => {
+                const isSelected = personaId === p.id;
+                const borderClass = isSelected ? accentBorderClass[p.accentColor] : 'border-slate-700';
+                const bgClass = isSelected ? 'bg-slate-800/80' : 'bg-slate-800/40 hover:bg-slate-800/60';
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setPersonaId(p.id)}
+                    className={`w-full text-left px-4 py-3.5 rounded-xl border-2 transition-all flex items-start gap-3 ${borderClass} ${bgClass}`}
+                  >
+                    <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1.5 ${accentDotClass[p.accentColor]}`} />
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-semibold text-sm leading-snug ${isSelected ? accentTextClass[p.accentColor] : 'text-slate-300'}`}>
+                        {p.name}
+                      </p>
+                      <p className="text-slate-500 text-xs mt-0.5 leading-snug">{p.tagline}</p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
 
+        {/* Navigation */}
         <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-700">
           <button
             onClick={handlePrev}

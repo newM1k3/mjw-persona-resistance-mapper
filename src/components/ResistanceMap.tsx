@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { ShieldAlert, Lightbulb, MessageSquare, Brain, AlertTriangle, Target, RotateCcw, ExternalLink, Copy, Check } from 'lucide-react';
-import type { ResistanceMap as ResistanceMapType, WizardInput } from '../types';
+import {
+  ShieldAlert, Lightbulb, MessageSquare, Brain, AlertTriangle,
+  Target, RotateCcw, ExternalLink, Copy, Check
+} from 'lucide-react';
+import type { ResistanceMap as ResistanceMapType, WizardInput, FrameworkName } from '../types';
 
 interface ResistanceMapProps {
   data: ResistanceMapType;
@@ -8,26 +11,94 @@ interface ResistanceMapProps {
   onReset: () => void;
 }
 
-// Hardened: uses .includes() to avoid exact-match failures from LLM hallucinations
+// ─── Badge Colours ────────────────────────────────────────────────────────────
+// Hardened: uses .toLowerCase().includes() to survive minor LLM name variations
+
 function getFrameworkBadgeColor(frameworkName: string): string {
-  if (frameworkName.toLowerCase().includes('cialdini')) return 'bg-violet-900/40 text-violet-300 border-violet-700';
-  if (frameworkName.toLowerCase().includes('kahneman') || frameworkName.toLowerCase().includes('loss')) return 'bg-amber-900/40 text-amber-300 border-amber-700';
-  if (frameworkName.toLowerCase().includes('fogg') || frameworkName.toLowerCase().includes('behavior')) return 'bg-cyan-900/40 text-cyan-300 border-cyan-700';
+  const n = frameworkName.toLowerCase();
+  if (n.includes('influence')) return 'bg-violet-900/40 text-violet-300 border-violet-700';
+  if (n.includes('loss')) return 'bg-amber-900/40 text-amber-300 border-amber-700';
+  if (n.includes('friction')) return 'bg-cyan-900/40 text-cyan-300 border-cyan-700';
+  if (n.includes('value')) return 'bg-emerald-900/40 text-emerald-300 border-emerald-700';
+  if (n.includes('trust')) return 'bg-blue-900/40 text-blue-300 border-blue-700';
+  if (n.includes('category')) return 'bg-indigo-900/40 text-indigo-300 border-indigo-700';
+  if (n.includes('urgency')) return 'bg-orange-900/40 text-orange-300 border-orange-700';
   return 'bg-slate-800 text-slate-300 border-slate-600';
 }
 
-// Dynamic CTA: surface a relevant next step based on the resistance type
-function getDynamicCta(resistanceName: string): { headline: string; sub: string; label: string; href: string } {
-  const lower = resistanceName.toLowerCase();
-  if (lower.includes('authority') || lower.includes('trust') || lower.includes('credib')) {
+// ─── Dynamic CTA ──────────────────────────────────────────────────────────────
+// Surfaces a contextually relevant next step based on the matched framework persona
+
+interface CtaConfig {
+  headline: string;
+  sub: string;
+  label: string;
+  href: string;
+}
+
+function getDynamicCta(frameworkName: FrameworkName, resistanceName: string): CtaConfig {
+  const n = frameworkName.toLowerCase();
+  const r = resistanceName.toLowerCase();
+
+  if (n.includes('influence')) {
     return {
-      headline: 'Authority is the antidote. Script it.',
-      sub: 'Learn how to build credibility into every touchpoint — from first email to close.',
-      label: 'Get the Authority Playbook',
+      headline: 'Compliance is engineered, not requested.',
+      sub: 'Learn how to build the six influence triggers into every touchpoint — from first impression to close.',
+      label: 'Get the Influence Playbook',
       href: 'https://mjwdesign.ca/playbook',
     };
   }
-  if (lower.includes('price') || lower.includes('budget') || lower.includes('cost') || lower.includes('loss')) {
+  if (n.includes('loss')) {
+    return {
+      headline: 'Make the cost of waiting feel real.',
+      sub: 'Discover how to reframe your offer as the safe choice — and make inaction feel like the risk.',
+      label: 'Get the Loss Framing Playbook',
+      href: 'https://mjwdesign.ca/playbook',
+    };
+  }
+  if (n.includes('friction')) {
+    return {
+      headline: 'Remove the friction. Watch the conversions climb.',
+      sub: 'Map every step between desire and purchase — and eliminate the ones that are costing you sales.',
+      label: 'Get the Friction Removal Playbook',
+      href: 'https://mjwdesign.ca/playbook',
+    };
+  }
+  if (n.includes('value')) {
+    return {
+      headline: 'Price resistance is a value story failure.',
+      sub: 'Learn how to stack value, anchor price, and make your offer feel like the obvious choice.',
+      label: 'Get the Value Architecture Playbook',
+      href: 'https://mjwdesign.ca/playbook',
+    };
+  }
+  if (n.includes('trust')) {
+    return {
+      headline: "They don't doubt your offer. They doubt you.",
+      sub: 'Build a credibility engine that turns scepticism into confidence before the sales conversation even starts.',
+      label: 'Get the Trust Building Playbook',
+      href: 'https://mjwdesign.ca/playbook',
+    };
+  }
+  if (n.includes('category')) {
+    return {
+      headline: "If they can't place you, they won't buy you.",
+      sub: 'Learn how to define your category, own your position, and make your offer the only logical choice.',
+      label: 'Get the Positioning Playbook',
+      href: 'https://mjwdesign.ca/playbook',
+    };
+  }
+  if (n.includes('urgency')) {
+    return {
+      headline: '"I\'ll think about it" is a decision — to do nothing.',
+      sub: 'Script the conversation that makes the cost of waiting feel more expensive than buying today.',
+      label: 'Get the Urgency Engineering Playbook',
+      href: 'https://mjwdesign.ca/playbook',
+    };
+  }
+
+  // Fallback — use resistance name as a secondary signal
+  if (r.includes('price') || r.includes('budget') || r.includes('cost')) {
     return {
       headline: 'Price resistance is a framing problem.',
       sub: 'Discover how to reframe cost as risk — and make inaction feel more expensive than buying.',
@@ -35,15 +106,7 @@ function getDynamicCta(resistanceName: string): { headline: string; sub: string;
       href: 'https://mjwdesign.ca/playbook',
     };
   }
-  if (lower.includes('social') || lower.includes('proof') || lower.includes('validation') || lower.includes('peer')) {
-    return {
-      headline: 'They need to see others like them succeed.',
-      sub: 'Build a social proof engine that turns hesitation into confidence.',
-      label: 'Get the Social Proof Playbook',
-      href: 'https://mjwdesign.ca/playbook',
-    };
-  }
-  // Default CTA
+
   return {
     headline: 'Knowing the resistance is only half the battle.',
     sub: 'Learn how to script the entire conversation — from first touch to closed deal.',
@@ -52,7 +115,8 @@ function getDynamicCta(resistanceName: string): { headline: string; sub: string;
   };
 }
 
-// Format the resistance map as clean markdown for clipboard export
+// ─── Clipboard Export ─────────────────────────────────────────────────────────
+
 function formatAsMarkdown(data: ResistanceMapType, input: WizardInput | null): string {
   const lines: string[] = [];
   lines.push(`# Resistance Map: ${data.personaName}`);
@@ -70,7 +134,7 @@ function formatAsMarkdown(data: ResistanceMapType, input: WizardInput | null): s
   lines.push(`> **Hidden Fear:** "${data.primaryResistance.hiddenFear}"`);
   lines.push('');
   lines.push('## The Antidote');
-  lines.push(`**Framework:** ${data.frameworkMatch.frameworkName}`);
+  lines.push(`**Analytical Lens:** ${data.frameworkMatch.frameworkName}`);
   lines.push(`**Core Principle:** ${data.frameworkMatch.corePrinciple}`);
   lines.push('');
   lines.push(data.frameworkMatch.whyItWorks);
@@ -84,31 +148,31 @@ function formatAsMarkdown(data: ResistanceMapType, input: WizardInput | null): s
   return lines.join('\n');
 }
 
+// ─── Component ────────────────────────────────────────────────────────────────
+
 export default function ResistanceMap({ data, wizardInput, onReset }: ResistanceMapProps) {
   const [copied, setCopied] = useState(false);
-  const cta = getDynamicCta(data.primaryResistance.name);
+  const cta = getDynamicCta(data.frameworkMatch.frameworkName, data.primaryResistance.name);
 
   const handleCopy = async () => {
     const text = formatAsMarkdown(data, wizardInput);
     try {
       await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
     } catch {
-      // Fallback for environments without clipboard API
       const el = document.createElement('textarea');
       el.value = text;
       document.body.appendChild(el);
       el.select();
       document.execCommand('copy');
       document.body.removeChild(el);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
     }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
   };
 
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6 pb-16">
+
       {/* Header */}
       <div className="text-center space-y-3 py-6">
         <p className="text-xs font-semibold tracking-widest uppercase text-slate-500">Resistance Map — Diagnostic Report</p>
@@ -117,7 +181,9 @@ export default function ResistanceMap({ data, wizardInput, onReset }: Resistance
           <h1 className="text-3xl md:text-4xl font-black text-cyan-400 tracking-tight">{data.personaName}</h1>
         </div>
         <div className="w-20 h-px bg-cyan-500/40 mx-auto" />
-        <p className="text-slate-400 text-sm max-w-md mx-auto">Your customer's psychological resistance has been isolated. The antidote follows.</p>
+        <p className="text-slate-400 text-sm max-w-md mx-auto">
+          Your customer's psychological resistance has been isolated. The antidote follows.
+        </p>
       </div>
 
       {/* Section 01 — Diagnosis */}
@@ -157,7 +223,7 @@ export default function ResistanceMap({ data, wizardInput, onReset }: Resistance
         <div className="p-6 space-y-5">
           <div className="flex flex-wrap items-start gap-4">
             <div>
-              <p className="text-xs font-semibold tracking-widest uppercase text-slate-500 mb-2">Framework</p>
+              <p className="text-xs font-semibold tracking-widest uppercase text-slate-500 mb-2">Analytical Lens</p>
               <span className={`inline-flex items-center px-3 py-1.5 rounded-lg border text-sm font-semibold ${getFrameworkBadgeColor(data.frameworkMatch.frameworkName)}`}>
                 {data.frameworkMatch.frameworkName}
               </span>
